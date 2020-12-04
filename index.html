@@ -13,24 +13,6 @@
   var width = 1000;
   var height = 1000;
 
-  var data = [];
-  for (i = 0; i < 400000; i++) {
-    data.push({
-      x: Math.random() * 1000,
-      y: Math.random() * 1000,
-      size: Math.random() * 100,
-    });
-  }
-
-  console.log(data);
-
-  var quadtree = d3.quadtree()
-      .extent([[-1, -1], [width + 1, height + 1]])
-      .x(d=> d.x)
-      .y(d=>d.y)
-      .addAll(data);
-
-  console.log(quadtree.data());
 
   function brushed(extent) {
       d3.select('rect')
@@ -76,18 +58,22 @@
         nbCities,
         0,
         points.length - 1,
-        (a, b) => b.size - a.size
+        (a, b) => b.engagement_count - a.engagement_count
       );
       points.splice(nbCities, points.length - 1)
     }
     let nbrendered = points.length;
     context.globalAlpha = 0.5;
     context.fillStyle = 'black';
-    const k = 1 / 10 / t.k;
+    const k = 1 / t.k * 3;
     for (let i = 0; i < points.length; i++) {
       const d = points[i],
-        v = d.size * k;
+        v = Math.log(d.engagement_count) * k;
       context.beginPath();
+
+      let colors = ['#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02','#a6761d','#666666', '#e1e1e1'];
+      context.fillStyle = colors[parseInt(d.k20) % colors.length];
+
 
       context.arc(
         d.x,
@@ -128,11 +114,32 @@
               viewbox[1][0],
               viewbox[1][1]
       );
-      //const points = data;
       draw(context, points, t);
 
       context.restore();
     }
+  }
+
+  var quadtree = d3.quadtree()
+      .extent([[-1, -1], [width + 1, height + 1]])
+      .x(d=> d.x)
+      .y(d=>d.y);
+
+  var data = null;
+  d3.csv("https://raw.githubusercontent.com/AnnaAD/d3-dashboard/master/tweet_data.csv").then(function(d) {
+    for(let i = 0; i < d.length; i++) {
+      coors = coordinate_shift(d[i].x, d[i].y);
+      d[i].x = coors.x;
+      d[i].y = coors.y;
+    }
+    data = d;
+    console.log(data);
+    quadtree.addAll(data);
+    draw(context, data, d3.zoomIdentity);
+  });
+
+  function coordinate_shift(x,y) {
+    return {x: x * 40 + width/2, y: y * 40 + height/2}
   }
 
 
@@ -149,7 +156,6 @@
 
   d3.select(canvas).call(zoom);
 
-  draw(context, data, d3.zoomIdentity);
 
 
 
