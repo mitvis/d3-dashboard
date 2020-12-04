@@ -137,19 +137,15 @@
 
 
 
-  var canvas  = d3.select("#chart").append("canvas")
+  var canvas  = d3.select("#chart").append("svg")
     .attr("id", "canvas")
     .attr("width", width)
     .attr("height", height);
 
-  canvas = canvas.node();
-
-  var context = canvas.getContext("2d");
-
 
   d3.select(canvas).call(zoom);
 
-  draw(context, data, d3.zoomIdentity);
+  draw(canvas, data, d3.zoomIdentity);
 
 
 
