@@ -104,7 +104,7 @@ class TweetScatterplot extends React.Component {
         context.beginPath();
 
         const key = `k20-${Number(d.k20).toFixed(0)}`;
-        const visCluster = String(visClusters[key]);
+        const visCluster = visClusters[key] || 'null';
 
         context.fillStyle = visClusterColors[visCluster];
 
