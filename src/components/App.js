@@ -70,7 +70,7 @@ class App extends React.Component {
       <div className="App">
         <FilterCheckboxes communityColors={this.state.communityColors} selectedCommunities={this.state.selectedCommunities} onCheckboxChange={(a, b) => this.onCheckboxChange(a, b)}></FilterCheckboxes>
         <TweetScatterplot 
-          width={window.innerWidth}
+          width={window.innerWidth / 2}
           height={window.innerHeight}
           data={this.state.data} 
           communityColors={this.state.communityColors}

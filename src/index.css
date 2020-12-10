@@ -47,7 +47,7 @@ body {
 }
 
 #canvas {
-  border: 1px solid white;
+  border-right: 1px solid white;
 }
 
 .tweet-scatterplot-legend {
