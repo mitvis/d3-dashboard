@@ -59,6 +59,10 @@ body {
   padding: 10px;
 }
 
+.engagement_count {
+  float:right;
+}
+
 .tweet-scatterplot-legend {
   position: fixed;
   top: 5px;
