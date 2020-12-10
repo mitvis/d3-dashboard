@@ -52,8 +52,9 @@ class TweetScatterplot extends React.Component {
         context, points, t
       });
     })
-      
+
     const tau = Math.PI * 2;
+    let hover_able = [];
 
       // Find the nodes within the specified rectangle.
     function search(quadtree, x0, y0, x3, y3) {
@@ -94,7 +95,7 @@ class TweetScatterplot extends React.Component {
         );
         points.splice(nbCities, points.length - 1)
       }
-      
+
       context.globalAlpha = 0.5;
       context.fillStyle = 'black';
       const k = 1 / t.k * 3;
@@ -107,7 +108,8 @@ class TweetScatterplot extends React.Component {
         const visCluster = visClusters[key] || 'null';
 
         context.fillStyle = visClusterColors[visCluster];
-
+        d.size = Math.sqrt(v);
+        hover_able.push(d);
         context.arc(
           d.x,
           d.y,
@@ -170,12 +172,38 @@ class TweetScatterplot extends React.Component {
       return {x: x * 40 + width/2, y: y * 40 + height/2}
     }
 
+    let self = this;
+    function getMousePos(canvas, evt) {
+        console.log(self.state.t);
+        var rect = canvas.getBoundingClientRect();
+        return {
+          x:(Math.round(evt.clientX - rect.left) - self.state.t.x)/self.state.t.k,
+          y:(Math.round(evt.clientY - rect.top) - self.state.t.y)/self.state.t.k
+        }
+    }
+
+
     var canvas  = d3.select("#chart").append("canvas")
       .attr("id", "canvas")
       .attr("width", width)
       .attr("height", height);
 
     canvas = canvas.node();
+
+    canvas.addEventListener('mousemove', evt => {
+      if (this.state.t == null) {
+        return; //avoid race condition
+      }
+      let mousePos = getMousePos(canvas,evt);
+      console.log(mousePos);
+      let tweet = null;
+      for(let i = 0; i < hover_able.length; i++){
+        if (Math.sqrt(Math.pow(hover_able[i].x - mousePos.x,2) + Math.pow(hover_able[i].y - mousePos.y,2)) < hover_able[i].size) {
+          tweet = hover_able[i];
+        }
+      }
+      this.props.onFocusChange(tweet);
+    });
 
     var context = canvas.getContext("2d");
 
@@ -186,24 +214,25 @@ class TweetScatterplot extends React.Component {
     d3.select(canvas).call(zoom);
   }
 
+
   componentDidUpdate(prevProps) {
     if (prevProps !== this.props) {
       const context = this.state.context;
       const points = this.state.points;
       const t = this.state.t;
-  
+
       context.save();
-  
+
       context.clearRect(0, 0, this.props.width, this.props.height);
-  
+
       context.translate(t.x, t.y);
       context.scale(t.k, t.k);
-      
+
       window.draw(context, points, t);
-  
+
       context.restore();
-    }  
-    
+    }
+
   }
 
   render() {

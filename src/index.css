@@ -50,6 +50,15 @@ body {
   border-right: 1px solid white;
 }
 
+.tweet-tooltip {
+  background-color: white;
+  width: 500px;
+  position: fixed;
+  top: 50px;
+  right: 20px;
+  padding: 10px;
+}
+
 .tweet-scatterplot-legend {
   position: fixed;
   top: 5px;

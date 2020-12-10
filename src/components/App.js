@@ -1,6 +1,7 @@
 import React from 'react';
 import FilterCheckboxes from './FilterCheckboxes';
 import TweetScatterplot from './TweetScatterplot';
+import FocusedTweet from './FocusedTweet';
 
 const d3 = window.d3;
 
@@ -13,9 +14,10 @@ class App extends React.Component {
       data: null,
       communityColors: null,
       selectedCommunities: null,
+      focusedTweet: null
     };
   }
-  
+
   componentDidMount() {
     d3.csv("https://raw.githubusercontent.com/AnnaAD/d3-dashboard/master/tweet_data.csv").then((d) => {
       const communityColors = {};
@@ -64,17 +66,34 @@ class App extends React.Component {
     })
   }
 
+  onFocusChange(tweet) {
+    if (tweet == null) {
+      this.setState({
+        focusedTweet: null
+      })
+    } else {
+      console.log(tweet.full_text);
+      this.setState({
+        focusedTweet: {url: tweet.url, text: tweet.full_text}
+      })
+    }
+  }
+
   render() {
     if (!this.state.data) return null;
     return (
       <div className="App">
+        {this.state.focusedTweet != null &&
+          <FocusedTweet tweet = {this.state.focusedTweet}> </FocusedTweet>
+        }
         <FilterCheckboxes communityColors={this.state.communityColors} selectedCommunities={this.state.selectedCommunities} onCheckboxChange={(a, b) => this.onCheckboxChange(a, b)}></FilterCheckboxes>
-        <TweetScatterplot 
+        <TweetScatterplot
           width={window.innerWidth / 2}
           height={window.innerHeight}
-          data={this.state.data} 
+          data={this.state.data}
           communityColors={this.state.communityColors}
-          selectedCommunities={this.state.selectedCommunities}></TweetScatterplot>
+          selectedCommunities={this.state.selectedCommunities}
+          onFocusChange = {(a) => this.onFocusChange(a)}></TweetScatterplot>
       </div>
     );
   }
