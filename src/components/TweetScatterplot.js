@@ -77,6 +77,8 @@ class TweetScatterplot extends React.Component {
     }
 
     window.draw = (context, points, t) => {
+      //console.log("drawing");
+      hover_able = [];
       if (this.props.selectedCommunities) {
         const selected = this.props.selectedCommunities;
         points = points.filter(p => {
@@ -108,8 +110,9 @@ class TweetScatterplot extends React.Component {
         const visCluster = visClusters[key] || 'null';
 
         context.fillStyle = visClusterColors[visCluster];
-        d.size = Math.sqrt(v);
-        hover_able.push(d);
+        let new_obj = Object.assign({}, d);
+        new_obj.size = Math.sqrt(v);
+        hover_able.push(new_obj);
         context.arc(
           d.x,
           d.y,
@@ -174,7 +177,7 @@ class TweetScatterplot extends React.Component {
 
     let self = this;
     function getMousePos(canvas, evt) {
-        console.log(self.state.t);
+        //console.log(self.state.t);
         var rect = canvas.getBoundingClientRect();
         return {
           x:(Math.round(evt.clientX - rect.left) - self.state.t.x)/self.state.t.k,
@@ -190,33 +193,63 @@ class TweetScatterplot extends React.Component {
 
     canvas = canvas.node();
 
+
+
     canvas.addEventListener('mousemove', evt => {
       if (this.state.t == null) {
         return; //avoid race condition
       }
       let mousePos = getMousePos(canvas,evt);
-      console.log(mousePos);
+      //console.log(mousePos);
       let tweet = null;
       for(let i = 0; i < hover_able.length; i++){
         if (Math.sqrt(Math.pow(hover_able[i].x - mousePos.x,2) + Math.pow(hover_able[i].y - mousePos.y,2)) < hover_able[i].size) {
           tweet = hover_able[i];
         }
       }
+      console.log("found tweet");
       this.props.onFocusChange(tweet);
     });
 
     var context = canvas.getContext("2d");
 
     quadtree.addAll(data);
+    console.log("zoom");
     window.draw(context, data, d3.zoomIdentity);
     this.debounceSaveState(context, data, d3.zoomIdentity);
 
     d3.select(canvas).call(zoom);
   }
 
+  isEquivalent = (a, b) => {
+      // Create arrays of property names
+      var aProps = Object.getOwnPropertyNames(a);
+      var bProps = Object.getOwnPropertyNames(b);
+
+      // If number of properties is different,
+      // objects are not equivalent
+      if (aProps.length != bProps.length) {
+          return false;
+      }
+
+      for (var i = 0; i < aProps.length; i++) {
+          var propName = aProps[i];
+
+          // If values of same property are not equal,
+          // objects are not equivalent
+          if (a[propName] !== b[propName] && propName != "onFocusChange") {
+              return false;
+          }
+      }
+
+      // If we made it this far, objects
+      // are considered equivalent
+      return true;
+  }
 
   componentDidUpdate(prevProps) {
-    if (prevProps !== this.props) {
+    if (!this.isEquivalent(prevProps, this.props)) {
+      console.log("update");
       const context = this.state.context;
       const points = this.state.points;
       const t = this.state.t;

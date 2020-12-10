@@ -54,7 +54,8 @@ class App extends React.Component {
   }
 
   onCheckboxChange(name, checked) {
-    const selection = this.state.selectedCommunities;
+    const selection = new Set(this.state.selectedCommunities);
+    console.log(selection);
     if (checked) {
       selection.add(name);
     }
@@ -67,13 +68,13 @@ class App extends React.Component {
   }
 
   onFocusChange(tweet) {
-    console.log(tweet);
+    //console.log(tweet);
     if (tweet == null) {
       this.setState({
         focusedTweet: null
       })
     } else {
-      console.log(tweet.full_text);
+      //console.log(tweet.full_text);
       this.setState({
         focusedTweet: {url: tweet.url, text: tweet.full_text, retweet: tweet.retweet_count, favorite: tweet.favorite_count, date: tweet.created_at, engagement: tweet.engagement_count}
       })
