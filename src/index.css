@@ -32,9 +32,15 @@ body {
   position: fixed;
   z-index: 1;
   top: 0;
-  left: 0;
+  right: 0;
 }
 
 #canvas {
   border: 1px solid white;
+}
+
+.tweet-scatterplot-legend {
+  position: fixed;
+  top: 5px;
+  pointer-events: none;
 }

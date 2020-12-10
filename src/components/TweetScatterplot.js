@@ -27,7 +27,7 @@ const visClusterColors = {
   'tables': '#66a61e',
   'maps': '#e6ab02',
   'dashboards': '#a6761d',
-  'images w/people': '#666666',
+  'images w/people': '#777777',
   'null': '#e1e1e1'
 }
 
@@ -76,15 +76,15 @@ class TweetScatterplot extends React.Component {
     }
 
     window.draw = (context, points, t) => {
+      if (this.props.selectedCommunities) {
+        const selected = this.props.selectedCommunities;
+        points = points.filter(p => {
+          return selected.has(p.g_d5_c10)
+        });
+      }
 
       if (points.length > nbCities) {
-        if (this.props.selectedCommunities) {
-          const selected = this.props.selectedCommunities;
-          points = points.filter(p => selected.has(p.g_d5_c10));
-        }
-        else {
-          points = points.slice();
-        }
+        points = points.slice();
         d3.quickselect(   // very nice suggestion from https://observablehq.com/@fil Thanks!!
           points,
           nbCities,
@@ -134,7 +134,7 @@ class TweetScatterplot extends React.Component {
 
         context.translate(t.x, t.y);
         context.scale(t.k, t.k);
-        const points = search(
+        let points = search(
                 quadtree,
                 viewbox[0][0],
                 viewbox[0][1],
@@ -181,31 +181,46 @@ class TweetScatterplot extends React.Component {
 
     quadtree.addAll(data);
     window.draw(context, data, d3.zoomIdentity);
+    this.debounceSaveState(context, data, d3.zoomIdentity);
 
     d3.select(canvas).call(zoom);
   }
 
-  componentDidUpdate() {
-    const context = this.state.context;
-    const points = this.state.points;
-    const t = this.state.t;
-    // window.draw(this.state.context, this.state.points, this.state.t);
-
-    context.save();
-
-    context.clearRect(0, 0, this.props.width, this.props.height);
-
-    context.translate(t.x, t.y);
-    context.scale(t.k, t.k);
-    
-    window.draw(context, points, t);
-
-    context.restore();
+  componentDidUpdate(prevProps) {
+    if (prevProps !== this.props) {
+      const context = this.state.context;
+      const points = this.state.points;
+      const t = this.state.t;
+  
+      context.save();
+  
+      context.clearRect(0, 0, this.props.width, this.props.height);
+  
+      context.translate(t.x, t.y);
+      context.scale(t.k, t.k);
+      
+      window.draw(context, points, t);
+  
+      context.restore();
+    }  
     
   }
 
   render() {
-    return <div></div>;
+    return <div className="tweet-scatterplot-legend">
+      <svg height={200}>
+        {
+          Object.keys(visClusterColors).map((cluster, i) => {
+            return (
+              <g key={cluster}>
+                <circle cx={10} cy={20 * i + 10} r={7} fill={visClusterColors[cluster]} />
+                <text x={20} y={20 * i + 15} fill={visClusterColors[cluster]}>{cluster === 'null' ? 'other' : cluster}</text>
+              </g>
+            )
+          })
+        }
+      </svg>
+    </div>;
   }
 }
 
