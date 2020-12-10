@@ -5,6 +5,32 @@ const d3 = window.d3;
 
 let nbCities = 1000; // n biggest cities to draw
 
+const visClusters = {
+  'k20-2': 'line charts',
+  'k20-4': 'line charts',
+  'k20-13': 'area charts',
+  'k20-16': 'bar charts',
+  'k20-9': 'bar charts',
+  'k40-3': 'pie charts',
+  'k20-0': 'tables',
+  'k20-7': 'tables',
+  'k20-15': 'maps',
+  'k20-11': 'dashboards',
+  'k20-1': 'images w/people',
+};
+
+const visClusterColors = {
+  'line charts': '#1b9e77',
+  'area charts': '#d95f02',
+  'bar charts': '#7570b3',
+  'pie charts': '#e7298a',
+  'tables': '#66a61e',
+  'maps': '#e6ab02',
+  'dashboards': '#a6761d',
+  'images w/people': '#666666',
+  'null': '#e1e1e1'
+}
+
 class TweetScatterplot extends React.Component {
 
   constructor(props) {
@@ -53,12 +79,8 @@ class TweetScatterplot extends React.Component {
 
       if (points.length > nbCities) {
         if (this.props.selectedCommunities) {
-          const communities = Object.keys(this.props.communityColors);
           const selected = this.props.selectedCommunities;
-          points = points.filter(p => {
-            const key = p.k20;
-            return communities.includes(key) ? selected.has(key) : selected.has('-1');
-          });
+          points = points.filter(p => selected.has(p.g_d5_c10));
         }
         else {
           points = points.slice();
@@ -81,7 +103,10 @@ class TweetScatterplot extends React.Component {
           v = Math.log(d.engagement_count) * k;
         context.beginPath();
 
-        context.fillStyle = this.props.communityColors[Number(d.k20)] || '#eeeeee';;
+        const key = `k20-${Number(d.k20).toFixed(0)}`;
+        const visCluster = String(visClusters[key]);
+
+        context.fillStyle = visClusterColors[visCluster];
 
         context.arc(
           d.x,

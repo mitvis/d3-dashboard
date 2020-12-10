@@ -31,8 +31,13 @@ class App extends React.Component {
       const communityFrequencies = {};
 
       for(let i = 0; i < d.length; i++) {
-        const k20 = Number(d[i].k20);
-        communityFrequencies[k20] = communityFrequencies[k20] ? communityFrequencies[k20] + 1 : 1;
+        let community = d[i].g_d5_c10;
+        if (!d[i].g_d5_c10 && d[i].g_d5_c10 !== 0) {
+          community = -1;
+        }
+        community = Number(community).toFixed(0);
+        d[i].g_d5_c10 = community
+        communityFrequencies[community] = communityFrequencies[community] ? communityFrequencies[community] + 1 : 1;
       }
 
       console.log(communityFrequencies);
