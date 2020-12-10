@@ -7,7 +7,7 @@ class FilterCheckboxes extends React.Component {
 
   createCheckboxes = (communityColors, selectedCommunities) => {
     return Object.entries(communityColors).map(([key, value]) => {
-      return (<div key={key} style={{"backgroundColor": value, "padding": 5, "display": "inline-block"}}>
+      return (<div key={key} className={'filter-checkbox'} style={{"backgroundColor": value}}>
         <label htmlFor={key}>{key}</label>
         <input
           type="checkbox"
@@ -22,6 +22,7 @@ class FilterCheckboxes extends React.Component {
   render() {
     return (
       <div className="filter-checkboxes">
+        <div className={"filter-checkboxes-label"}>Communities:</div>
         {this.createCheckboxes(this.props.communityColors, this.props.selectedCommunities)}
       </div>
     );

@@ -35,6 +35,17 @@ body {
   right: 0;
 }
 
+.filter-checkboxes-label {
+  display: inline-block;
+  color: white;
+  margin-right: 5px;
+}
+
+.filter-checkbox {
+  padding: 5px;
+  display: inline-block;
+}
+
 #canvas {
   border: 1px solid white;
 }
@@ -42,5 +53,6 @@ body {
 .tweet-scatterplot-legend {
   position: fixed;
   top: 5px;
+  left: 5px;
   pointer-events: none;
 }
