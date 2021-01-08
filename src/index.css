@@ -50,6 +50,14 @@ body {
   border-right: 1px solid white;
 }
 
+#networkcanvas {
+  border-right: 1px solid white;
+}
+
+#chart {
+  display:flex;
+}
+
 .tweet-tooltip {
   background-color: white;
   width: 500px;

@@ -2,6 +2,8 @@ import React from 'react';
 import FilterCheckboxes from './FilterCheckboxes';
 import TweetScatterplot from './TweetScatterplot';
 import FocusedTweet from './FocusedTweet';
+import NetworkGraph from './NetworkGraph';
+
 
 const d3 = window.d3;
 
@@ -14,7 +16,9 @@ class App extends React.Component {
       data: null,
       communityColors: null,
       selectedCommunities: null,
-      focusedTweet: null
+      focusedTweet: null,
+      nodes: null,
+      edges: null
     };
   }
 
@@ -51,6 +55,16 @@ class App extends React.Component {
         selectedCommunities: new Set(domain.map(n => String(n)))
       });
     });
+
+    d3.csv("https://raw.githubusercontent.com/AnnaAD/d3NetworkGraph/main/network-graph-test/nodes.csv").then((d) => {
+      d3.csv("https://raw.githubusercontent.com/AnnaAD/d3NetworkGraph/main/network-graph-test/edges.csv").then((e) => {
+        console.log(e);
+        this.setState({
+          edges: e,
+          nodes: d
+        });
+    });
+  });
   }
 
   onCheckboxChange(name, checked) {
@@ -96,6 +110,14 @@ class App extends React.Component {
           communityColors={this.state.communityColors}
           selectedCommunities={this.state.selectedCommunities}
           onFocusChange = {(a) => this.onFocusChange(a)}></TweetScatterplot>
+          <NetworkGraph
+            width={window.innerWidth / 2}
+            height={window.innerHeight}
+            data={this.state.nodes}
+            edges = {this.state.edges}
+            communityColors={this.state.communityColors}
+            selectedCommunities={this.state.selectedCommunities}
+            onFocusChange = {(a) => this.onFocusChange(a)}></NetworkGraph>
       </div>
     );
   }
