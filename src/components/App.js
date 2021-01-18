@@ -110,14 +110,16 @@ class App extends React.Component {
           communityColors={this.state.communityColors}
           selectedCommunities={this.state.selectedCommunities}
           onFocusChange = {(a) => this.onFocusChange(a)}></TweetScatterplot>
-          <NetworkGraph
-            width={window.innerWidth / 2}
-            height={window.innerHeight}
-            data={this.state.nodes}
-            edges = {this.state.edges}
-            communityColors={this.state.communityColors}
-            selectedCommunities={this.state.selectedCommunities}
-            onFocusChange = {(a) => this.onFocusChange(a)}></NetworkGraph>
+          {this.state.nodes != null &&
+            <NetworkGraph
+              width={window.innerWidth / 2}
+              height={window.innerHeight}
+              data={this.state.nodes}
+              edges = {this.state.edges}
+              communityColors={this.state.communityColors}
+              selectedCommunities={this.state.selectedCommunities}
+              onFocusChange = {(a) => this.onFocusChange(a)}></NetworkGraph>
+          }
       </div>
     );
   }
