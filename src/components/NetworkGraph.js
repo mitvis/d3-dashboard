@@ -14,7 +14,10 @@ class NetworkGraph extends React.Component {
       context: null,
       points: null,
       edges: null,
-      t: null
+      canvas: null,
+      t: null,
+      zoomBehaviour:null,
+      nodeCenters: null
     }
   }
 
@@ -23,8 +26,35 @@ class NetworkGraph extends React.Component {
     const height = this.props.height;
 
     this.debounceSaveState = debounce(250, (context, points, t) => {
+
+      if(this.state.nodeCenters == null) {
+
+        let nodeCenters = {};
+        console.log(nodeCenters);
+
+        for(let i = 0; i < points.length; i++) {
+          let d = points[i];
+          if(d.color in nodeCenters) {
+            nodeCenters[d.color].x += d.x;
+            nodeCenters[d.color].y += d.y;
+            nodeCenters[d.color].count += 1;
+          } else {
+            nodeCenters[d.color] = {x: d.x, y:d.y, count: 1};
+          }
+        }
+
+        for (const [key, value] of Object.entries(nodeCenters)) {
+          nodeCenters[key].x = value.x/value.count;
+          nodeCenters[key].y = value.y/value.count;
+        }
+        this.setState({nodeCenters:nodeCenters});
+
+      }
+
+
+
       this.setState({
-        context, points, t
+        context, points, t, canvas
       });
     })
 
@@ -51,6 +81,8 @@ class NetworkGraph extends React.Component {
       return nodes
     }
 
+
+
     window.drawNetwork = (context, points, edges, t) => {
       //console.log("drawing");
 
@@ -68,8 +100,10 @@ class NetworkGraph extends React.Component {
 
       context.globalAlpha = 0.5;
       context.fillStyle = 'black';
+
       const k = 1 / t.k;
       for (let i = 0; i < points.length; i++) {
+
         const d = points[i],
           v = d.r * k;
         context.beginPath();
@@ -85,6 +119,7 @@ class NetworkGraph extends React.Component {
         ) // Color, size, anything can be changed.
         context.fill();
       }
+
 
       for (let i = 0; i < edges.length; i+= 5) {
         context.lineWidth = k * .5;
@@ -119,7 +154,7 @@ class NetworkGraph extends React.Component {
 
         const viewbox = [t.invert([0, 0]), t.invert([width, height])];
         // console.log(viewbox);
-
+        //console.log(t.x, t.y, t.k);
         context.translate(t.x, t.y);
         context.scale(t.k, t.k);
         let points = search(
@@ -139,6 +174,7 @@ class NetworkGraph extends React.Component {
 
       const context = sel.node().getContext("2d");
       const zoomBehaviour = d3.zoom().on("zoom", zoomed);
+      this.setState({zoomBehaviour: zoomBehaviour});
       sel.call(zoomBehaviour);
     }
 
@@ -230,25 +266,42 @@ class NetworkGraph extends React.Component {
       return true;
   }
 
+  zoomCommunity = (community) => {
+      let communityToColor = {1:"#4e79a7", 12: "#9c755f",2: "#59a14f" ,6:"#76b7b2",13:"#af7aa1",15:"#bab0ab", 4:"#e15759",7:"#edc949",0:"#f28e2c",5:"#ff9da7"};
+      console.log(community);
+      community = communityToColor[community];
+
+      console.log(community);
+
+      d3.select(this.state.canvas).transition().duration(2500).call(
+       this.state.zoomBehaviour.transform,
+       d3.zoomIdentity.translate(this.props.width / 2, this.props.height / 2)
+       .scale(3)
+       .translate(-this.state.nodeCenters[community].x, -this.state.nodeCenters[community].y)
+     );
+
+
+     /*let d = this.props.data[Math.floor(Math.random() * this.props.data.length)];
+     console.log(d);
+       d3.select(this.state.canvas).transition().duration(2500).call(
+        this.state.zoomBehaviour.transform,
+        d3.zoomIdentity.translate(this.props.width / 2, this.props.height / 2).scale(40).translate(-d.x, -d.y)
+      );*/
+    }
+
+
+
   componentDidUpdate(prevProps) {
-    /*if (!this.isEquivalent(prevProps, this.props)) {
-      console.log("update");
-      const context = this.state.context;
-      const points = this.state.points;
-      const edges = this.state.edges;
-      const t = this.state.t;
+    if (!this.isEquivalent(prevProps, this.props)) {
+      console.log(prevProps);
+      console.log(this.props.selectedCommunities);
 
-      context.save();
+      if(this.props.selectedCommunities.size == 1){
+        console.log("zooming");
+        this.zoomCommunity(parseInt(this.props.selectedCommunities.values().next().value));
+      }
 
-      context.clearRect(0, 0, this.props.width, this.props.height);
-
-      context.translate(t.x, t.y);
-      context.scale(t.k, t.k);
-
-      window.drawNetwork(context, points, edges, t);
-
-      context.restore();
-    }*/
+    }
 
   }
 
